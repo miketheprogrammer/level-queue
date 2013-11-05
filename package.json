@@ -30,8 +30,6 @@
   },
   "dependencies": {
     "through": "~2.3.4",
-    "map-reduce": "~5.0.1",
-    "node-uuid": "~1.4.1",
     "microtime": "~0.4.0"
   },
   "devDependencies": {

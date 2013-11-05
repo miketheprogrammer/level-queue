@@ -1,8 +1,12 @@
 /*
 * The general flow here is borrowed from Julian Gruber's Sum module.
 * Since the goals of this module are somewhat similar.
+
+
+TODO :
+
+* Need to emit events, such as dequeued, enqueued, change.
 */
-var MapReduce = require('map-reduce');
 var events = require('events');
 var EventEmitter = events.EventEmitter || events.EventEmmiter2;
 var inherits = require('util').inherits;
