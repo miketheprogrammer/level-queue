@@ -101,7 +101,7 @@ describe('level-queue', function () {
     });
 
     describe('dequeue', function () {
-        it('Should remove 1 item from the queue', function (done) {
+        it('Should remove 1 item from the queue retaining order', function (done) {
             var db = SubLevel(level());
             var queue = LevelQueue(db);
             var key = ['worker', 'tasks'];
@@ -114,6 +114,7 @@ describe('level-queue', function () {
                 if (res) {
                     queue.toArray(key, function (err, arr) {
                         assert(arr.length === 1);
+                        assert(arr[0].value === 'hello');
                         done();
                     });
                 }
