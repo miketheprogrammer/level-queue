@@ -17,9 +17,21 @@ describe('level-queue', function () {
                 else done(new Error)
             });
             queue.enqueue(key, 'hello world');
+            
 
         });
-        it('Should retain order', function(done) {
+        it('Should emit enqueued event', function (done) {
+            var db = SubLevel(level());
+            var queue = LevelQueue(db);
+            var key = ['worker', 'task'];
+            queue.on('enqueued', function(res) {
+                console.log(res);
+                done();
+            });
+            queue.enqueue(key, 'hello world');
+                     
+        });
+        it('Should retain order', function (done) {
             var msg1 = 'Hello';
             var msg2 = 'World';
 
@@ -113,6 +125,7 @@ describe('level-queue', function () {
 
                 if (res) {
                     queue.toArray(key, function (err, arr) {
+                        console.log(arr);
                         assert(arr.length === 1);
                         assert(arr[0].value === 'hello');
                         done();

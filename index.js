@@ -24,6 +24,10 @@ function Queue(db) {
 
 inherits(Queue, EventEmitter);
 
+/*
+Does not automatically remove elements from the queue. 
+It simply creates an open readstream and returns a through stream.
+*/
 Queue.prototype.follow = function (key) {
     if (!Array.isArray(key)) key = [key];
 
@@ -71,17 +75,35 @@ Queue.prototype.enqueue = function (key, value, cb) {
     if (Array.isArray(key)) key = key.join('!');
     var suffix  = microtime.now();
     var complexKey = [key, suffix].join('!');
-    this.db.put(complexKey, value, cb);
+
+    cb = cb || Emit.bind(this, 'enqueued');
+    this.db.put(complexKey, value, { valueEncoding: 'json' }, cb);
 };
 
 Queue.prototype.dequeue = function (key, cb) {
     var ref = this;
     this.toArray(key, function (err, arr) {
         var key = arr[arr.length - 1].key.join('!');
+        cb = cb || Emit.bind(ref, 'dequeued');
         ref.db.del(key, function(err) {
             if (err) cb(err, false);
             else cb(null, true);
         });
     });
 };
+
+// Alternative to dequeue
+Queue.prototype.shift = function (key, cb) {
+    this.dequeue(key, cb);
+};
+
+// Alternative to enqueue
+Queue.prototype.unshift = function (key, value, cb) {
+    this.enqueue(key, value, cb);
+};
+
+function Emit(evt, err, res) {
+    if (err) this.emit('error', err);
+    else this.emit(evt, res);
+}
 
