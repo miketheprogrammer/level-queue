@@ -77,13 +77,20 @@ Queue.prototype.enqueue = function (key, value, cb) {
     var complexKey = [key, suffix].join('!');
 
     cb = cb || Emit.bind(this, 'enqueued');
-    this.db.put(complexKey, value, { valueEncoding: 'json' }, cb);
+    this.db.put(complexKey,
+                value,
+                { valueEncoding: 'json' },
+                function(err) {
+                    if (err) cb(err, false);
+                    else cb(null, true);
+                });
+
 };
 
 Queue.prototype.dequeue = function (key, cb) {
     var ref = this;
     this.toArray(key, function (err, arr) {
-        var key = arr[arr.length - 1].key.join('!');
+        var key = arr[0].key.join('!');
         cb = cb || Emit.bind(ref, 'dequeued');
         ref.db.del(key, function(err) {
             if (err) cb(err, false);
@@ -95,11 +102,6 @@ Queue.prototype.dequeue = function (key, cb) {
 // Alternative to dequeue
 Queue.prototype.shift = function (key, cb) {
     this.dequeue(key, cb);
-};
-
-// Alternative to enqueue
-Queue.prototype.unshift = function (key, value, cb) {
-    this.enqueue(key, value, cb);
 };
 
 function Emit(evt, err, res) {

@@ -13,19 +13,16 @@ describe('level-queue', function () {
             var follow = queue.follow(key);
             follow.on('data', function data(msg) {
                 if (msg.value.indexOf('hello world') !== -1) 
-                    done()
-                else done(new Error)
+                    done();
+                else done(new Error());
             });
             queue.enqueue(key, 'hello world');
-            
-
         });
         it('Should emit enqueued event', function (done) {
             var db = SubLevel(level());
             var queue = LevelQueue(db);
             var key = ['worker', 'task'];
             queue.on('enqueued', function(res) {
-                console.log(res);
                 done();
             });
             queue.enqueue(key, 'hello world');
@@ -125,13 +122,23 @@ describe('level-queue', function () {
 
                 if (res) {
                     queue.toArray(key, function (err, arr) {
-                        console.log(arr);
                         assert(arr.length === 1);
-                        assert(arr[0].value === 'hello');
+                        assert(arr[0].value === '"world"');
                         done();
                     });
                 }
             });
+        });
+        it('Should emit dequeued event', function (done) {
+            var db = SubLevel(level());
+            var queue = LevelQueue(db);
+            var key = ['worker', 'tasks'];
+            queue.enqueue(key, 'hello');
+            queue.enqueue(key, 'world');
+            queue.on('dequeued', function (res) {
+                done();
+            });
+            queue.dequeue(key);
         });
     });
 });
